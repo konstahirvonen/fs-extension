@@ -1,48 +1,41 @@
-import { useState } from "react"
-import blogService from '../services/blogs'
-import { useNavigate } from "react-router-dom"
-import { Button, TextField } from "@mui/material"
+import { useState } from "react";
+import blogService from "../services/blogs";
+import { useNavigate } from "react-router-dom";
+import { Button, TextField } from "@mui/material";
+import { useNotificationActions } from "../store";
 
-const NewBlogForm = ({ user, blogs, setBlogs, setMessage }) => {
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
-  const navigate = useNavigate()
+const NewBlogForm = ({ user, blogs, setBlogs }) => {
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [url, setUrl] = useState("");
+  const navigate = useNavigate();
+  const { setNotification } = useNotificationActions()
 
   const addBlog = (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     createBlog({
       title: title,
       author: author,
-      url: url
-    })
- 
-    setTitle('')
-    setAuthor('')
-    setUrl('')
-    navigate("/")
-  }
+      url: url,
+    });
 
-  const createBlog = blogObject => {
-    blogService
-          .create(blogObject)
-          .then(returnedBlog => {
-            console.log('response')
-            setBlogs(blogs.concat(returnedBlog))
-            setMessage({
-              text: `Blog "${returnedBlog.title}" by "${returnedBlog.author}" added`,
-              type: "success"
-            })
-            setTimeout(() => {
-              setMessage(null)
-            }, 5000)
-          })
-  }
+    setTitle("");
+    setAuthor("");
+    setUrl("");
+    navigate("/");
+  };
+
+  const createBlog = (blogObject) => {
+    blogService.create(blogObject).then((returnedBlog) => {
+      console.log("response");
+      setBlogs(blogs.concat(returnedBlog));
+      setNotification(`Blog "${returnedBlog.title}" by "${returnedBlog.author}" added"`, "success")
+    });
+  };
 
   return (
     <div>
-
       <form onSubmit={addBlog}>
         <h2>create new</h2>
         <div>
@@ -69,10 +62,12 @@ const NewBlogForm = ({ user, blogs, setBlogs, setMessage }) => {
             onChange={(e) => setUrl(e.target.value)}
           />
         </div>
-        <Button type='submit' variant="contained" style={{ marginTop: 10 }}>create</Button>
+        <Button type="submit" variant="contained" style={{ marginTop: 10 }}>
+          create
+        </Button>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default NewBlogForm
+export default NewBlogForm;

@@ -1,45 +1,52 @@
-import { useState, useEffect } from 'react'
-import blogService from './services/blogs'
-import LoginForm from './components/Loginform'
-import BlogForm from './components/BlogForm'
-import Blog from './components/Blog'
-import { BrowserRouter as Router, Routes, Route, Link, useMatch, Navigate } from "react-router-dom"
-import NewBlogForm from './components/NewBlog'
-import { Notification } from './components/Notification'
-import { AppBar, Box, Button, Container, Toolbar, Typography } from "@mui/material"
+import { useState, useEffect } from "react";
+import blogService from "./services/blogs";
+import LoginForm from "./components/Loginform";
+import BlogForm from "./components/BlogForm";
+import Blog from "./components/Blog";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useMatch,
+  Navigate,
+} from "react-router-dom";
+import NewBlogForm from "./components/NewBlog";
+import Notification from "./components/Notification";
+import {
+  AppBar,
+  Box,
+  Button,
+  Container,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import ErrorBoundary from "./components/ErrorBoundary";
+import TestError from "./components/TestError";
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
-  const [user, setUser] = useState(null)
-  const [message, setMessage] = useState(null)
-  const match = useMatch("/blogs/:id")
-  const blog = match ? blogs.find(blog => blog.id === match.params.id) : null
-
+  const [blogs, setBlogs] = useState([]);
+  const [user, setUser] = useState(null);
+  const match = useMatch("/blogs/:id");
+  const blog = match ? blogs.find((blog) => blog.id === match.params.id) : null;
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )
-  }, [])
+    blogService.getAll().then((blogs) => setBlogs(blogs));
+  }, []);
 
   const handleLogout = () => {
-    setUser(null)
-    window.localStorage.removeItem('loggedBlogappUser')
-  }
+    setUser(null);
+    window.localStorage.removeItem("loggedBlogappUser");
+  };
 
   return (
     <Container>
       <div>
-
         <AppBar position="static">
-          <Toolbar sx={{justifyContent: "space-between"}}>
-
-            <Typography variant="h4">
-              Blog app
-            </Typography>
+          <Toolbar sx={{ justifyContent: "space-between" }}>
+            <Typography variant="h4">Blog app</Typography>
 
             <Box>
-
               <Button color="inherit" component={Link} to="/">
                 blogs
               </Button>
@@ -59,36 +66,55 @@ const App = () => {
                   login
                 </Button>
               )}
-
             </Box>
           </Toolbar>
         </AppBar>
 
-        <Notification message={message} />
+        <Notification />
 
-        <Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route
+              path="/blogs/:id/"
+              element={
+                <Blog
+                  blog={blog}
+                  blogs={blogs}
+                  setBlogs={setBlogs}
+                  user={user}
+                />
+              }
+            />
 
-          <Route path="/blogs/:id" element={
-            <Blog blog={blog} blogs={blogs} setBlogs={setBlogs} user={user} />
-          } />
+            <Route
+              path="/"
+              element={
+                <BlogForm blogs={blogs} setBlogs={setBlogs} user={user} />
+              }
+            />
 
-          <Route path="/" element={
-            <BlogForm blogs={blogs} setBlogs={setBlogs} user={user} />
-          } />
+            <Route
+              path="/create"
+              element={
+                <NewBlogForm
+                  user={user}
+                  blogs={blogs}
+                  setBlogs={setBlogs}
+                />
+              }
+            />
 
-          <Route path="/create" element={
-            <NewBlogForm user={user} blogs={blogs} setBlogs={setBlogs} setMessage={setMessage} />
-          } />
+            <Route
+              path="/login"
+              element={<LoginForm user={user} setUser={setUser} />}
+            />
 
-          <Route path='/login' element={
-            <LoginForm user={user} setUser={setUser} />
-          } />
-
-          
-        </Routes>
+            <Route path="*" element={<h1>404 - Page not found</h1>} />
+          </Routes>
+        </ErrorBoundary>
       </div>
     </Container>
-  )
-}
+  );
+};
 
-export default App
+export default App;

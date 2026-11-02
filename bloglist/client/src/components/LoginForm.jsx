@@ -1,52 +1,43 @@
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import loginService from '../services/login'
-import blogService from '../services/blogs'
-import { Notification } from '../components/Notification'
-import { TextField, Button } from "@mui/material"
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import loginService from "../services/login";
+import blogService from "../services/blogs";
+import { TextField, Button } from "@mui/material";
+import { useNotificationActions } from "../store";
 
-const LoginForm = ({user, setUser}) => {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [message, setMessage] = useState(null)
-  const navigate = useNavigate()
+const LoginForm = ({ user, setUser }) => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const { setNotification } = useNotificationActions()
 
   useEffect(() => {
-      const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
-      if (loggedUserJSON) {
-        const user = JSON.parse(loggedUserJSON)
-        setUser(user)
-      }
-    }, [])
+    const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON);
+      setUser(user);
+    }
+  }, []);
 
-  const handleLogin = async e => {
-    e.preventDefault()
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
     try {
-      const user = await loginService.login({ username, password })
-      blogService.setToken(user.token)
+      const user = await loginService.login({ username, password });
+      blogService.setToken(user.token);
 
-      window.localStorage.setItem(
-        'loggedBlogappUser', JSON.stringify(user)
-      )
-      setUser(user)
-      setUsername('')
-      setPassword('')
-      navigate("/")
+      window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
+      setUser(user);
+      setUsername("");
+      setPassword("");
+      navigate("/");
     } catch {
-      setMessage({
-        type: "error",
-        text: "wrong credentials"
-      })
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      setNotification("wrong credentials", "error")
     }
-  }
+  };
 
   return (
     <div>
-      <Notification message={message} />
 
       <form onSubmit={handleLogin}>
         <h2>Login to application</h2>
@@ -66,10 +57,12 @@ const LoginForm = ({user, setUser}) => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <Button type="submit" variant="contained" style={{ marginTop: 10 }}>login</Button>
+        <Button type="submit" variant="contained" style={{ marginTop: 10 }}>
+          login
+        </Button>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;
