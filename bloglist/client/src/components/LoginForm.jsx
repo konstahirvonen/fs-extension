@@ -1,33 +1,26 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import loginService from "../services/login";
-import blogService from "../services/blogs";
-import { TextField, Button } from "@mui/material";
-import { useNotificationActions } from "../store";
 
-const LoginForm = ({ user, setUser }) => {
+import { TextField, Button } from "@mui/material";
+import { useNotificationActions, useUserActions } from "../store";
+
+const LoginForm = ({ user }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { setNotification } = useNotificationActions()
+  const { loginUser, initialize } = useUserActions()
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON);
-      setUser(user);
-    }
-  }, []);
+    initialize()
+  }, [initialize]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const user = await loginService.login({ username, password });
-      blogService.setToken(user.token);
+      loginUser(username, password)
 
-      window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
-      setUser(user);
       setUsername("");
       setPassword("");
       navigate("/");

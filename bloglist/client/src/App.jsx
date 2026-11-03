@@ -23,21 +23,21 @@ import {
 } from "@mui/material";
 import ErrorBoundary from "./components/ErrorBoundary";
 import TestError from "./components/TestError";
+import { useBlogActions, useBlogs, useUser, useUserActions } from "./store";
+import Users from "./components/Users";
 
 const App = () => {
-  const [blogs, setBlogs] = useState([]);
-  const [user, setUser] = useState(null);
+  const blogs = useBlogs()
   const match = useMatch("/blogs/:id");
   const blog = match ? blogs.find((blog) => blog.id === match.params.id) : null;
+  const { logoutUser } = useUserActions()
+  const user = useUser()
+
+  const { initialize } = useBlogActions()
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
-  }, []);
-
-  const handleLogout = () => {
-    setUser(null);
-    window.localStorage.removeItem("loggedBlogappUser");
-  };
+    initialize()
+  }, [initialize])
 
   return (
     <Container>
@@ -51,6 +51,10 @@ const App = () => {
                 blogs
               </Button>
 
+              <Button color="inherit" component={Link} to="/users">
+                users
+              </Button>
+
               {user && (
                 <Button color="inherit" component={Link} to="/create">
                   new blog
@@ -58,7 +62,7 @@ const App = () => {
               )}
 
               {user ? (
-                <Button color="inherit" onClick={handleLogout}>
+                <Button color="inherit" onClick={logoutUser}>
                   logout
                 </Button>
               ) : (
@@ -79,17 +83,22 @@ const App = () => {
               element={
                 <Blog
                   blog={blog}
-                  blogs={blogs}
-                  setBlogs={setBlogs}
                   user={user}
                 />
+              }
+            />
+
+            <Route 
+              path="/users"
+              element={
+                <Users />
               }
             />
 
             <Route
               path="/"
               element={
-                <BlogForm blogs={blogs} setBlogs={setBlogs} user={user} />
+                <BlogForm user={user} />
               }
             />
 
@@ -98,15 +107,13 @@ const App = () => {
               element={
                 <NewBlogForm
                   user={user}
-                  blogs={blogs}
-                  setBlogs={setBlogs}
                 />
               }
             />
 
             <Route
               path="/login"
-              element={<LoginForm user={user} setUser={setUser} />}
+              element={<LoginForm user={user} />}
             />
 
             <Route path="*" element={<h1>404 - Page not found</h1>} />

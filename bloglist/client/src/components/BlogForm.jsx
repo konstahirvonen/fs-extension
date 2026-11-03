@@ -1,7 +1,10 @@
-import Blog from "./Blog";
+import { useBlogs } from "../store";
 import { Link } from "react-router-dom";
 
-const BlogForm = ({ blogs, setBlogs, user }) => {
+const BlogForm = ({ user }) => {
+
+  const blogs = useBlogs()
+
   return (
     <div className="blog">
       <h2>blogs</h2>

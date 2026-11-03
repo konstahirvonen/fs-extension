@@ -1,18 +1,15 @@
-import { useState } from "react";
-import blogService from "../services/blogs";
 import { Link, useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, Typography, Button, Box } from "@mui/material";
+import { useBlogActions } from "../store";
 
 const Blog = ({
   blog,
-  setBlogs,
-  blogs,
   user,
-  updateLikes = blogService.updateLikes,
 }) => {
   const id = useParams().id;
   const navigate = useNavigate();
+  const { like, remove } = useBlogActions()
 
   if (!blog) {
     return <h1>404 - Page not found</h1>;
@@ -25,23 +22,12 @@ const Blog = ({
       return null;
     }
 
-    const blogObject = {
-      title: blog.title,
-      author: blog.author,
-      url: blog.url,
-      likes: blog.likes + 1,
-    };
-
-    const returnedBlog = await updateLikes(blog.id, blogObject);
-
-    setBlogs(blogs.map((b) => (b.id === returnedBlog.id ? returnedBlog : b)));
+    like(blog.id)
   };
 
   const removeBlog = async () => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
-      await blogService.removeBlog(blog.id);
-
-      setBlogs((blogs) => blogs.filter((b) => b.id !== blog.id));
+      remove(blog.id)
       navigate("/");
     }
   };

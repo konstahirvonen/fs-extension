@@ -1,38 +1,31 @@
 import { useState } from "react";
-import blogService from "../services/blogs";
 import { useNavigate } from "react-router-dom";
 import { Button, TextField } from "@mui/material";
-import { useNotificationActions } from "../store";
+import { useBlogActions, useBlogs, useNotificationActions } from "../store";
 
-const NewBlogForm = ({ user, blogs, setBlogs }) => {
+const NewBlogForm = ({ user }) => {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [url, setUrl] = useState("");
   const navigate = useNavigate();
   const { setNotification } = useNotificationActions()
+  const { add } = useBlogActions()
 
-  const addBlog = (e) => {
-    e.preventDefault();
-
-    createBlog({
+  const addBlog = async (e) => {
+    e.preventDefault()
+    const content = ({
       title: title,
       author: author,
-      url: url,
-    });
+      url: url
+    })
+    await add(content)
+    setNotification(`Blog "${content.title}" by "${content.author}" added"`, "success")
 
     setTitle("");
     setAuthor("");
     setUrl("");
     navigate("/");
-  };
-
-  const createBlog = (blogObject) => {
-    blogService.create(blogObject).then((returnedBlog) => {
-      console.log("response");
-      setBlogs(blogs.concat(returnedBlog));
-      setNotification(`Blog "${returnedBlog.title}" by "${returnedBlog.author}" added"`, "success")
-    });
-  };
+  }
 
   return (
     <div>
