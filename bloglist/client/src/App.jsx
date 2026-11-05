@@ -11,7 +11,7 @@ import {
   useMatch,
   Navigate,
 } from "react-router-dom";
-import NewBlogForm from "./components/NewBlog";
+import NewBlog from "./components/NewBlog";
 import Notification from "./components/Notification";
 import {
   AppBar,
@@ -121,7 +121,7 @@ const App = () => {
                 path="/create"
                 element={
                   user
-                  ? <NewBlogForm user={user} />
+                  ? <NewBlog user={user} />
                   : <LoginForm user={user} />
                 }
               />

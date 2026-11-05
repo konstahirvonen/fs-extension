@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button, TextField } from "@mui/material";
 import { useBlogActions, useBlogs, useNotificationActions } from "../store";
 
-const NewBlogForm = ({ user }) => {
+const NewBlog = ({ user }) => {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [url, setUrl] = useState("");
@@ -63,4 +63,4 @@ const NewBlogForm = ({ user }) => {
   );
 };
 
-export default NewBlogForm;
+export default NewBlog;
