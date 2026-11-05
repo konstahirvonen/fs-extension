@@ -19,12 +19,12 @@ const LoginForm = ({ user }) => {
     e.preventDefault();
 
     try {
-      loginUser(username, password)
+      await loginUser(username, password)
 
       setUsername("");
       setPassword("");
       navigate("/");
-    } catch {
+    } catch (error) {
       setNotification("wrong credentials", "error")
     }
   };

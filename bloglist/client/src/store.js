@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import usersService from './services/users'
+import { getUser, saveUser, removeUser } from './services/persistentUser'
 
 const useNotificationStore = create((set) => ({
     notification: null,
@@ -37,6 +39,15 @@ const useBlogStore = create((set, get) => ({
                 blogs: state.blogs.filter(b => b.id !== id)
             }))
         },
+        commentBlog: async (id, comment) => {
+            const updatedBlog = await blogService.comment(id, comment)
+
+            set(state => ({
+                blogs: state.blogs.map(blog =>
+                    blog.id === updatedBlog.id ? updatedBlog : blog
+                )
+            }))
+        }
     }
 }))
 
@@ -47,23 +58,25 @@ const useUserStore = create((set) => ({
         loginUser: async (username, password) => {
             const user = await loginService.login({ username, password })
             blogService.setToken(user.token)
-            window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
+            saveUser(user)
             set({ user })
         },
         logoutUser: () => {
-            window.localStorage.removeItem("loggedBlogappUser");
+            removeUser()
             blogService.setToken(null)
             set({ user: null })
         },
         initialize: () => {
-            const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
-            if (loggedUserJSON) {
-                const user = JSON.parse(loggedUserJSON);
+            const user = getUser()
+            if (user) {
                 blogService.setToken(user.token)
                 set({ user: user })
             }
         },
-
+        initializeAllUsers: async () => {
+            const users = await usersService.getAll()
+            set(() => ({ users }))
+        }
     }
 }))
 

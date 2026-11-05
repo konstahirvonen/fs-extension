@@ -1,5 +1,6 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const { userExtractor, tokenExtractor } = require('../utils/middleware')
 
 blogsRouter.get('/', async (request, response) => {
@@ -22,7 +23,7 @@ blogsRouter.post('/', tokenExtractor, userExtractor, async (request, response) =
   const user = request.user
 
   if (!user) {
-    return response.status(400).json({error: 'userId missing or not valid'})
+    return response.status(401).json({error: 'userId missing or not valid'})
   }
 
   const blog = new Blog({
@@ -34,7 +35,7 @@ blogsRouter.post('/', tokenExtractor, userExtractor, async (request, response) =
   })
 
   if (!request.body.title || !request.body.url) {
-    response.status(400).json({error: 'title or url missing'})
+    return response.status(400).json({error: 'title or url missing'})
   } else {
     const savedBlog = await blog.save()
     const populatedBlog = await savedBlog.populate('user')
@@ -60,6 +61,11 @@ blogsRouter.delete('/:id', tokenExtractor, userExtractor, async (request, respon
 
   if (blog.user.toString() === user.id) {
     await Blog.findByIdAndDelete(request.params.id)
+    await User.updateOne(
+      { _id: blog.user },
+      { $pull: { blogs: blog._id } }
+
+    )
     return response.status(204).end()
   }
 
@@ -76,6 +82,20 @@ blogsRouter.put('/:id', async (request, response) => {
 
   blog.likes = likes
 
+  const result = await blog.save()
+  response.status(200).json(result)
+})
+
+blogsRouter.put('/:id/comments', async (request, response) => {
+  const { comments } = request.body
+  const blog = await Blog.findById(request.params.id).populate('user')
+
+  if (!blog) {
+    return response.status(404).end()
+  }
+
+  blog.comments = blog.comments.concat(comments)
+  
   const result = await blog.save()
   response.status(200).json(result)
 })

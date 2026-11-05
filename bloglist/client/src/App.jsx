@@ -30,13 +30,18 @@ const App = () => {
   const blogs = useBlogs()
   const match = useMatch("/blogs/:id");
   const blog = match ? blogs.find((blog) => blog.id === match.params.id) : null;
+  
   const { logoutUser } = useUserActions()
   const user = useUser()
 
   const { initialize } = useBlogActions()
 
+  const [blogsLoaded, setBlogsLoaded] = useState(false)
+
   useEffect(() => {
-    initialize()
+    initialize().then(() => {
+      setBlogsLoaded(true)
+    })
   }, [initialize])
 
   return (
@@ -74,51 +79,63 @@ const App = () => {
           </Toolbar>
         </AppBar>
 
+        <Box sx={{ mb: 2 }} />
+
         <Notification />
+              
+        {blogsLoaded && (
+          <ErrorBoundary>
+            <Routes>
+              <Route
+                path="/blogs/:id/"
+                element={
+                  <Blog
+                    blog={blog}
+                    user={user}
+                  />
+                }
+              />
 
-        <ErrorBoundary>
-          <Routes>
-            <Route
-              path="/blogs/:id/"
-              element={
-                <Blog
-                  blog={blog}
-                  user={user}
-                />
-              }
-            />
+              <Route 
+                path="/users"
+                element={
+                  <Users />
+                }
+              />
 
-            <Route 
-              path="/users"
-              element={
-                <Users />
-              }
-            />
+              <Route
+                path="/users/:id"
+                element={
+                  <Users />
+                }
+              />
 
-            <Route
-              path="/"
-              element={
-                <BlogForm user={user} />
-              }
-            />
+              <Route
+                path="/"
+                element={
+                  <BlogForm user={user} />
+                }
+              />
 
-            <Route
-              path="/create"
-              element={
-                <NewBlogForm
-                  user={user}
-                />
-              }
-            />
+              <Route
+                path="/create"
+                element={
+                  user
+                  ? <NewBlogForm user={user} />
+                  : <LoginForm user={user} />
+                }
+              />
 
-            <Route
-              path="/login"
-              element={<LoginForm user={user} />}
-            />
+              <Route
+                path="/login"
+                element={<LoginForm user={user} />}
+              />
 
-            <Route path="*" element={<h1>404 - Page not found</h1>} />
-          </Routes>
-        </ErrorBoundary>
+              <Route path="*" element={<h1>404 - Page not found</h1>} />
+              
+            </Routes>
+          </ErrorBoundary>
+        )}
       </div>
     </Container>
   );
