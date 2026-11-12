@@ -1,0 +1,31 @@
+services:
+  client:
+    image: bloglist-frontend
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - 8080:80
+    depends_on:
+      - server
+
+  server:
+    image: bloglist-backend
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - 3001:3001
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/bloglist
+      - PORT=3001
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
